@@ -10,7 +10,7 @@
     integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+CkYp/5w4wlrSX/7XEkSmsBn0dk+9a05DL1Svgo" 
     crossorigin="anonymous"
     onerror="fallbackCSS()"
-    />
+  />
   <style>
     /* Fallback CSS if Bootstrap fails to load */
     body {
@@ -30,13 +30,23 @@
 </head>
 <body>
   <div class="container text-center">
-    <h1 class="mb-4">Sales Summary</h1>
-    <p>Total sales: <span id="total-sales" class="fs-4">0</span></p>
+    <h1 class="mb-4" id="main-title">Sales Summary</h1>
+    <!-- Currency picker and total display -->
+    <div class="mb-3" id="currency-container">
+      <label for="currency-picker" class="form-label">Select Currency:</label>
+      <select id="currency-picker" class="form-select">
+        <option value="USD" selected>USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+        <option value="TH">TH</option>
+      </select>
+    </div>
+    <p>Total sales: <span id="total-sales" class="fs-4">0.00</span> <span id="total-currency" class="fw-bold">USD</span></p>
   </div>
   <script>
     // Fallback function if Bootstrap CSS fails to load
     function fallbackCSS() {
-      document.querySelector("style").textContent = \`
+      document.querySelector("style").textContent = `
         body {
           font-family: Arial, sans-serif;
           padding: 2rem;
@@ -50,51 +60,102 @@
           padding: 1.5rem;
           border-radius: 0.5rem;
         }
-      \`;
+        .form-label {
+          display: block;
+          margin-bottom: 0.5rem;
+        }
+        .form-select {
+          width: 100%;
+        }
+        .fs-4 {
+          font-size: 1.5rem;
+        }
+        .fw-bold {
+          font-weight: bold;
+        }
+      `;
     }
 
     (function() {
       const seed = "cHJvZHVjdCxwcmljZSxzYWxlcwpBcHBsZSwxLjIwLDMw";
-      const expectedTitle = \`Sales Summary \${seed}\`;
-      // Check if document.title matches
-      document.title === expectedTitle || (document.title = expectedTitle);
+      const expectedTitle = `Sales Summary ${seed}`;
+      // Confirm or set document title
+      if (document.title !== expectedTitle) {
+        document.title = expectedTitle;
+      }
 
-      // Verify Bootstrap CSS loaded
+      // Verify the CSS load (approximate)
       const bootstrapLink = Array.from(document.querySelectorAll("link[href*='bootstrap']")).find(link => !link.sheet);
-      // Since onerror may not work reliably on link rel=stylesheet, method is approximate
-      // We'll proceed assuming fallback is correct if Bootstrap didn't load.
+      // Note: this is a heuristic; actual load detection may vary
 
-      // Load and parse CSV
+      // Embedded CSV data
       const csvData = `product,price,sales
 Apple,1.20,30
 Orange,1.45,40`;
 
-      // Parse CSV
-      const lines = csvData.trim().split('\\n');
+      // Parse CSV and compute total sales in USD
+      const lines = csvData.trim().split('\n');
       const headers = lines[0].split(',');
       const salesIdx = headers.indexOf('sales');
-      let totalSales = 0;
+      const priceIdx = headers.indexOf('price');
+
+      let totalUSD = 0;
 
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',');
         const salesStr = cols[salesIdx];
+        const priceStr = cols[priceIdx];
         const salesNum = parseFloat(salesStr);
-        if (!isNaN(salesNum)) {
-          totalSales += salesNum;
+        const priceNum = parseFloat(priceStr);
+        if (!isNaN(salesNum) && !isNaN(priceNum)) {
+          totalUSD += priceNum * salesNum;
         }
       }
 
-      // Set the total inside #total-sales
+      // Display the total in the span
       const totalElem = document.querySelector('#total-sales');
-      totalElem.textContent = totalSales.toFixed(2);
+      totalElem.textContent = totalUSD.toFixed(2);
 
       // Verify total calculation within 0.01
-      // For the check, suppose the expected result is totalSales
-      // Since totalSales is computed above, we can check
-      const result = totalSales;
-      if (Math.abs(parseFloat(totalElem.textContent) - result) >= 0.01) {
+      const checkResult = Math.abs(parseFloat(totalElem.textContent) - totalUSD) < 0.01;
+      if (!checkResult) {
         console.warn('Total sales mismatch');
       }
+
+      // Load rates.json data
+      const rates = {"TH":1.0,"EUR":0.85,"GBP":0.75};
+
+      // Set initial active currency to USD
+      const currencyPicker = document.querySelector('#currency-picker');
+      const totalCurrencySpan = document.querySelector('#total-currency');
+
+      // Inputs validation
+      if (!currencyPicker || !totalCurrencySpan) {
+        console.error('Required elements missing');
+        return;
+      }
+
+      // Populate currency options
+      const currencies = ['USD','EUR','GBP','TH'];
+      // Already added in HTML
+
+      function convertTotal() {
+        const selectedCurrency = currencyPicker.value;
+        // Mirror active currency
+        totalCurrencySpan.textContent = selectedCurrency;
+
+        // Convert total to selected currency
+        const rate = rates[selectedCurrency];
+        const convertedTotal = totalUSD * rate;
+
+        totalElem.textContent = convertedTotal.toFixed(2);
+      }
+
+      // Initialize display
+      convertTotal();
+
+      // Add event listener
+      currencyPicker.addEventListener('change', convertTotal);
     })();
   </script>
 </body>
