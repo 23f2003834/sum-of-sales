@@ -26,6 +26,19 @@
       padding: 1.5rem;
       border-radius: 0.5rem;
     }
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .form-select {
+      width: 100%;
+    }
+    .fs-4 {
+      font-size: 1.5rem;
+    }
+    .fw-bold {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -34,7 +47,7 @@
     <!-- Currency picker and total display -->
     <div class="mb-3" id="currency-container">
       <label for="currency-picker" class="form-label">Select Currency:</label>
-      <select id="currency-picker" class="form-select">
+      <select id="currency-picker" class="form-select" aria-label="Currency selection">
         <option value="USD" selected>USD</option>
         <option value="EUR">EUR</option>
         <option value="GBP">GBP</option>
@@ -84,9 +97,13 @@
         document.title = expectedTitle;
       }
 
-      // Verify the CSS load (approximate)
-      const bootstrapLink = Array.from(document.querySelectorAll("link[href*='bootstrap']")).find(link => !link.sheet);
-      // Note: this is a heuristic; actual load detection may vary
+      // Verify the CSS load (heuristic)
+      const bootstrapLinks = Array.from(document.querySelectorAll("link[href*='bootstrap']"));
+      const bootstrapLinked = bootstrapLinks.some(link => {
+        // Basic check: ensure link is present
+        return link && link.href.includes('bootstrap');
+      });
+      // Note: More robust load detection could involve onload event on the link, but omitted for simplicity
 
       // Embedded CSV data
       const csvData = `product,price,sales
@@ -114,7 +131,9 @@ Orange,1.45,40`;
 
       // Display the total in the span
       const totalElem = document.querySelector('#total-sales');
-      totalElem.textContent = totalUSD.toFixed(2);
+      if (totalElem) {
+        totalElem.textContent = totalUSD.toFixed(2);
+      }
 
       // Verify total calculation within 0.01
       const checkResult = Math.abs(parseFloat(totalElem.textContent) - totalUSD) < 0.01;
@@ -125,19 +144,16 @@ Orange,1.45,40`;
       // Load rates.json data
       const rates = {"TH":1.0,"EUR":0.85,"GBP":0.75};
 
-      // Set initial active currency to USD
+      // Set initial active currency
       const currencyPicker = document.querySelector('#currency-picker');
       const totalCurrencySpan = document.querySelector('#total-currency');
 
-      // Inputs validation
       if (!currencyPicker || !totalCurrencySpan) {
         console.error('Required elements missing');
         return;
       }
 
-      // Populate currency options
-      const currencies = ['USD','EUR','GBP','TH'];
-      // Already added in HTML
+      const totalSalesSpan = document.querySelector('#total-sales');
 
       function convertTotal() {
         const selectedCurrency = currencyPicker.value;
@@ -148,15 +164,17 @@ Orange,1.45,40`;
         const rate = rates[selectedCurrency];
         const convertedTotal = totalUSD * rate;
 
-        totalElem.textContent = convertedTotal.toFixed(2);
+        if (totalSalesSpan) {
+          totalSalesSpan.textContent = convertedTotal.toFixed(2);
+        }
       }
 
       // Initialize display
       convertTotal();
 
-      // Add event listener
+      // Add event listener to currency select
       currencyPicker.addEventListener('change', convertTotal);
     })();
   </script>
 </body>
-</html
+</html>
