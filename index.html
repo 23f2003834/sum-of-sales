@@ -97,14 +97,12 @@
         document.title = expectedTitle;
       }
 
-      // Verify the CSS load (heuristic)
+      // Verify Bootstrap CSS load (heuristic)
       const bootstrapLinks = Array.from(document.querySelectorAll("link[href*='bootstrap']"));
       const bootstrapLinked = bootstrapLinks.some(link => {
-        // Basic check: ensure link is present
         return link && link.href.includes('bootstrap');
       });
-      // Note: More robust load detection could involve onload event on the link, but omitted for simplicity
-
+      
       // Embedded CSV data
       const csvData = `product,price,sales
 Apple,1.20,30
@@ -129,41 +127,38 @@ Orange,1.45,40`;
         }
       }
 
-      // Display the total in the span
+      // Display total
       const totalElem = document.querySelector('#total-sales');
       if (totalElem) {
         totalElem.textContent = totalUSD.toFixed(2);
       }
 
-      // Verify total calculation within 0.01
+      // Verify total calculation
       const checkResult = Math.abs(parseFloat(totalElem.textContent) - totalUSD) < 0.01;
       if (!checkResult) {
         console.warn('Total sales mismatch');
       }
 
-      // Load rates.json data
+      // Load rates.json data (embedded)
       const rates = {"TH":1.0,"EUR":0.85,"GBP":0.75};
 
-      // Set initial active currency
       const currencyPicker = document.querySelector('#currency-picker');
       const totalCurrencySpan = document.querySelector('#total-currency');
+      const totalSalesSpan = document.querySelector('#total-sales');
 
-      if (!currencyPicker || !totalCurrencySpan) {
+      // Verify presence of elements
+      if (!currencyPicker || !totalCurrencySpan || !totalSalesSpan) {
         console.error('Required elements missing');
         return;
       }
-
-      const totalSalesSpan = document.querySelector('#total-sales');
 
       function convertTotal() {
         const selectedCurrency = currencyPicker.value;
         // Mirror active currency
         totalCurrencySpan.textContent = selectedCurrency;
-
-        // Convert total to selected currency
+        // Convert total
         const rate = rates[selectedCurrency];
         const convertedTotal = totalUSD * rate;
-
         if (totalSalesSpan) {
           totalSalesSpan.textContent = convertedTotal.toFixed(2);
         }
@@ -172,7 +167,7 @@ Orange,1.45,40`;
       // Initialize display
       convertTotal();
 
-      // Add event listener to currency select
+      // Add event listener
       currencyPicker.addEventListener('change', convertTotal);
     })();
   </script>
