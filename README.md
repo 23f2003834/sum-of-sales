@@ -21,4 +21,4 @@ Open the `index.html` file in a web browser to view the sales summary.
 - The code is entirely client-side and self-contained.
 - The sales data is included inline for simplicity; in production, it might be fetched from an external source.
 - The currency converter uses predefined rates (`rates.json`) embedded in the script.
-- The app validates the presence of key elements via checks, fulfilling the specified verification.
+- The app validates the presence of key elements via checks, fulfilling the specified verification. Output exactly in this format with no extra text or markdown code fences (```):
