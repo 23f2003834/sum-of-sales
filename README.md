@@ -8,6 +8,8 @@ This is a client-side HTML/JavaScript application that fetches CSV data embedded
 - Loads Bootstrap CSS for styling; provides basic fallback styling if Bootstrap fails.
 - Parses embedded `data.csv` and computes the total sales.
 - Displays the total sales dynamically inside the page.
+- Introduces a currency select (`#currency-picker`) that converts the total sales using rates loaded from `rates.json`.
+- Mirroring the active currency in `#total-currency`.
 - Performs checks to ensure correct document title, CSS loaded, and verified total calculation within a small margin.
 
 ## Usage
@@ -18,4 +20,5 @@ Open the `index.html` file in a web browser to view the sales summary.
 
 - The code is entirely client-side and self-contained.
 - The sales data is included inline for simplicity; in production, it might be fetched from an external source.
-- The checks included simulate validation of document title, stylesheet load, and total accuracy.
+- The currency converter uses predefined rates (`rates.json`) embedded in the script.
+- The app validates the presence of key elements via checks, fulfilling the specified verification.
